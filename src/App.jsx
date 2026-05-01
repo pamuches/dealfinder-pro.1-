@@ -13,7 +13,8 @@ const DealScraperAuth = () => {
   const VALID_CREDENTIALS = {
     'admin': 'password123',  // ← CORREGIDO: quité el espacio extra
     'usuario1': 'demo2024',
-    'invitado': 'invitado123'
+    'invitado': 'invitado123',
+    'coco':'cocoynico',
     // Agrega más usuarios aquí: 'nombreusuario': 'contraseña'
   };
 
