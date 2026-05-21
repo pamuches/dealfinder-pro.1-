@@ -58,7 +58,7 @@ REGLAS CRÍTICAS:
 3. Si no encuentras URL real, NO incluyas el producto
 4. Verifica que las URLs funcionen
 
-Encuentra 8-10 productos.
+Encuentra 5-7 productos.
 
 JSON (sin markdown):
 {
