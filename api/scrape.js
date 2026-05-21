@@ -34,7 +34,7 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         model: "claude-sonnet-4-6",
-        max_tokens: 4000,
+        max_tokens: 3000,
         messages: [{
           role: "user",
           content: `Eres un experto buscador de ofertas en México. Tu tarea es encontrar ofertas REALES y ACTUALES con descuentos mayores al 15%.
@@ -56,7 +56,7 @@ INSTRUCCIONES CRÍTICAS:
 4. Si no encuentras la URL real de un producto, NO lo incluyas
 5. Las URLs deben ser clickeables y llevar directo al producto
 
-Encuentra 10-15 ofertas reales.
+Encuentra 5-10 ofertas reales.
 
 Devuelve SOLO este JSON sin markdown:
 {
@@ -70,7 +70,11 @@ Devuelve SOLO este JSON sin markdown:
     "store": "nombre exacto de la tienda",
     "url": "URL REAL Y COMPLETA del producto",
     "description": "descripción breve",
-    "temperature": número_0_a_100
+    "temperature": número_0_a_100,
+    "priceComparison": [
+      {"store": "tienda1", "price": precio1, "url": "url_real1", "available": true},
+      {"store": "tienda2", "price": precio2, "url": "url_real2", "available": true}
+    ]
   }]
 }`
         }],
