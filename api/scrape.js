@@ -44,7 +44,7 @@ INSTRUCCIONES CRÍTICAS:
    - Amazon México (amazon.com.mx)
    - Liverpool (liverpool.com.mx)
    - Mercado Libre México
-   - Promodescuentos (promodescuentos.com.mx)
+   - Promodescuentos (promodescuentos.com)
 
 2. Para CADA producto que encuentres:
    - Busca el producto específico en el sitio
