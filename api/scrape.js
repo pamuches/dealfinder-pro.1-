@@ -47,12 +47,12 @@ INSTRUCCIONES CRÍTICAS:
    - Promodescuentos (promodescuentos.com)
 
 2. Para CADA producto que encuentres:
-   - Busca el producto específico en el sitio
-   - Obtén la URL REAL y COMPLETA del producto (no inventes URLs y asegurate que las URLs funcionen)
+   - Busca el producto específico en el sitio web
+   - Obtén la URL REAL y COMPLETA del producto (no inventes URLs y asegurate que las URLs funcionen y llevar directo al producto)
    - Verifica que tenga descuento real mayor al 15%
    - Copia la URL exacta de la página del producto
 
-3. NUNCA inventes URLs ni uses URLs de ejemplo
+3. NUNCA inventes URLs ni uses URLs de ejemplo nunca
 4. Si no encuentras la URL real de un producto, NO lo incluyas
 5. Las URLs deben ser clickeables y llevar directo al producto
 
