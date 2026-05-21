@@ -113,7 +113,7 @@ const PriceComparisonTable = ({ priceComparison, bestPrice, maxSavings }) => {
 };
 
 // ============================================
-// COMPONENTE: Historial de Precios
+// COMPONENTE: Historial de Precios (CORREGIDO)
 // ============================================
 const PriceHistoryChart = ({ priceHistory }) => {
   if (!priceHistory || priceHistory.length === 0) return null;
@@ -134,9 +134,14 @@ const PriceHistoryChart = ({ priceHistory }) => {
   const maxPrice = Math.max(...priceHistory.map(h => h.price));
   const minPrice = Math.min(...priceHistory.map(h => h.price));
   const priceRange = maxPrice - minPrice;
+  
+  // CORRECCIÓN: Si todos los precios son iguales, usar un rango mínimo
+  const effectiveRange = priceRange === 0 ? maxPrice * 0.1 : priceRange;
+  const effectiveMin = priceRange === 0 ? minPrice * 0.95 : minPrice;
+  
   const currentPrice = priceHistory[priceHistory.length - 1].price;
   const oldestPrice = priceHistory[0].price;
-  const priceChange = ((currentPrice - oldestPrice) / oldestPrice * 100).toFixed(1);
+  const priceChange = oldestPrice !== 0 ? ((currentPrice - oldestPrice) / oldestPrice * 100).toFixed(1) : 0;
   const isDown = priceChange < 0;
 
   return (
@@ -172,16 +177,16 @@ const PriceHistoryChart = ({ priceHistory }) => {
           gap: '4px',
           fontSize: '13px',
           fontWeight: '600',
-          color: isDown ? '#10b981' : '#ef4444'
+          color: isDown ? '#10b981' : priceChange > 0 ? '#ef4444' : '#94a3b8'
         }}>
-          {isDown ? '↓' : '↑'} {Math.abs(priceChange)}%
+          {priceChange == 0 ? '=' : isDown ? '↓' : '↑'} {Math.abs(priceChange)}%
         </div>
       </div>
 
       <div style={{ position: 'relative', height: '120px', marginBottom: '12px' }}>
         <svg width="100%" height="120" style={{ display: 'block' }}>
           <defs>
-            <linearGradient id={`priceGradient-${priceHistory[0].timestamp}`} x1="0" x2="0" y1="0" y2="1">
+            <linearGradient id={`priceGradient-${priceHistory[0]?.timestamp || 'default'}`} x1="0" x2="0" y1="0" y2="1">
               <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.3"/>
               <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0.05"/>
             </linearGradient>
@@ -195,18 +200,18 @@ const PriceHistoryChart = ({ priceHistory }) => {
           {/* Area under line */}
           <path
             d={priceHistory.map((point, i) => {
-              const x = (i / (priceHistory.length - 1)) * 100;
-              const y = 100 - ((point.price - minPrice) / priceRange) * 80;
+              const x = priceHistory.length > 1 ? (i / (priceHistory.length - 1)) * 100 : 50;
+              const y = 100 - ((point.price - effectiveMin) / effectiveRange) * 80;
               return `${i === 0 ? 'M' : 'L'} ${x}% ${y}`;
             }).join(' ') + ` L 100% 100 L 0 100 Z`}
-            fill={`url(#priceGradient-${priceHistory[0].timestamp})`}
+            fill={`url(#priceGradient-${priceHistory[0]?.timestamp || 'default'})`}
           />
           
           {/* Line */}
           <polyline
             points={priceHistory.map((point, i) => {
-              const x = (i / (priceHistory.length - 1)) * 100;
-              const y = 100 - ((point.price - minPrice) / priceRange) * 80;
+              const x = priceHistory.length > 1 ? (i / (priceHistory.length - 1)) * 100 : 50;
+              const y = 100 - ((point.price - effectiveMin) / effectiveRange) * 80;
               return `${x}%,${y}`;
             }).join(' ')}
             fill="none"
@@ -216,8 +221,8 @@ const PriceHistoryChart = ({ priceHistory }) => {
           
           {/* Points */}
           {priceHistory.map((point, i) => {
-            const x = (i / (priceHistory.length - 1)) * 100;
-            const y = 100 - ((point.price - minPrice) / priceRange) * 80;
+            const x = priceHistory.length > 1 ? (i / (priceHistory.length - 1)) * 100 : 50;
+            const y = 100 - ((point.price - effectiveMin) / effectiveRange) * 80;
             return (
               <circle
                 key={i}
@@ -234,17 +239,21 @@ const PriceHistoryChart = ({ priceHistory }) => {
       </div>
 
       {/* Dates */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        fontSize: '11px',
-        opacity: 0.6,
-        marginTop: '8px'
-      }}>
-        <span>{formatDate(priceHistory[0].date)}</span>
-        <span>{formatDate(priceHistory[Math.floor(priceHistory.length / 2)].date)}</span>
-        <span>{formatDate(priceHistory[priceHistory.length - 1].date)}</span>
-      </div>
+      {priceHistory.length > 1 && (
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          fontSize: '11px',
+          opacity: 0.6,
+          marginTop: '8px'
+        }}>
+          <span>{formatDate(priceHistory[0].date)}</span>
+          {priceHistory.length > 2 && (
+            <span>{formatDate(priceHistory[Math.floor(priceHistory.length / 2)].date)}</span>
+          )}
+          <span>{formatDate(priceHistory[priceHistory.length - 1].date)}</span>
+        </div>
+      )}
 
       {/* Price range */}
       <div style={{
