@@ -70,11 +70,7 @@ Devuelve SOLO este JSON sin markdown:
     "store": "nombre exacto de la tienda",
     "url": "URL REAL Y COMPLETA del producto",
     "description": "descripción breve",
-    "temperature": número_0_a_100,
-    "priceComparison": [
-      {"store": "tienda1", "price": precio1, "url": "url_real1", "available": true},
-      {"store": "tienda2", "price": precio2, "url": "url_real2", "available": true}
-    ]
+    "temperature": número_0_a_100
   }]
 }`
         }],
