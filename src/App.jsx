@@ -2,285 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { TrendingDown, TrendingUp, ExternalLink, RefreshCw, Zap, Tag, Clock, Heart, Filter, Star, Percent, Lock, LogOut } from 'lucide-react';
 
-// ============================================
-// COMPONENTE: Comparación de Precios
-// ============================================
-const PriceComparisonTable = ({ priceComparison, bestPrice, maxSavings }) => {
-  if (!priceComparison || priceComparison.length <= 1) return null;
-
-  const formatPrice = (price) => {
-    return new Intl.NumberFormat('es-MX', {
-      style: 'currency',
-      currency: 'MXN',
-      minimumFractionDigits: 0
-    }).format(price);
-  };
-
-  return (
-    <div style={{
-      marginTop: '16px',
-      padding: '16px',
-      background: 'rgba(30, 41, 59, 0.3)',
-      border: '1px solid rgba(148, 163, 184, 0.1)',
-      borderRadius: '12px'
-    }}>
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px',
-        marginBottom: '12px',
-        fontSize: '14px',
-        fontWeight: '600',
-        color: '#3b82f6'
-      }}>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M9 11l3 3L22 4"/>
-          <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
-        </svg>
-        Comparación de Precios
-      </div>
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-        {priceComparison.map((comp, idx) => (
-          <div key={idx} style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            padding: '10px 12px',
-            background: comp.price === bestPrice ? 'rgba(16, 185, 129, 0.1)' : 'rgba(51, 65, 85, 0.3)',
-            border: comp.price === bestPrice ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid rgba(148, 163, 184, 0.1)',
-            borderRadius: '8px',
-            fontSize: '14px'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ opacity: 0.8 }}>{comp.store}</span>
-              {comp.price === bestPrice && (
-                <span style={{
-                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                  padding: '2px 8px',
-                  borderRadius: '4px',
-                  fontSize: '11px',
-                  fontWeight: '700'
-                }}>
-                  MEJOR PRECIO
-                </span>
-              )}
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <span style={{
-                fontWeight: '700',
-                color: comp.price === bestPrice ? '#10b981' : '#e2e8f0'
-              }}>
-                {formatPrice(comp.price)}
-              </span>
-              {comp.url && (
-                <a 
-                  href={comp.url} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  style={{
-                    color: '#3b82f6',
-                    textDecoration: 'none',
-                    fontSize: '12px',
-                    opacity: 0.8
-                  }}
-                >
-                  Ver →
-                </a>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {maxSavings > 0 && (
-        <div style={{
-          marginTop: '12px',
-          padding: '8px 12px',
-          background: 'rgba(59, 130, 246, 0.1)',
-          border: '1px solid rgba(59, 130, 246, 0.2)',
-          borderRadius: '8px',
-          fontSize: '13px',
-          color: '#3b82f6',
-          textAlign: 'center',
-          fontWeight: '600'
-        }}>
-          💰 Ahorras hasta {formatPrice(maxSavings)} comprando en la tienda correcta
-        </div>
-      )}
-    </div>
-  );
-};
-
-// ============================================
-// COMPONENTE: Historial de Precios (CORREGIDO)
-// ============================================
-const PriceHistoryChart = ({ priceHistory }) => {
-  if (!priceHistory || priceHistory.length === 0) return null;
-
-  const formatPrice = (price) => {
-    return new Intl.NumberFormat('es-MX', {
-      style: 'currency',
-      currency: 'MXN',
-      minimumFractionDigits: 0
-    }).format(price);
-  };
-
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('es-MX', { month: 'short', year: '2-digit' });
-  };
-
-  const maxPrice = Math.max(...priceHistory.map(h => h.price));
-  const minPrice = Math.min(...priceHistory.map(h => h.price));
-  const priceRange = maxPrice - minPrice;
-  
-  // CORRECCIÓN: Si todos los precios son iguales, usar un rango mínimo
-  const effectiveRange = priceRange === 0 ? maxPrice * 0.1 : priceRange;
-  const effectiveMin = priceRange === 0 ? minPrice * 0.95 : minPrice;
-  
-  const currentPrice = priceHistory[priceHistory.length - 1].price;
-  const oldestPrice = priceHistory[0].price;
-  const priceChange = oldestPrice !== 0 ? ((currentPrice - oldestPrice) / oldestPrice * 100).toFixed(1) : 0;
-  const isDown = priceChange < 0;
-
-  return (
-    <div style={{
-      marginTop: '16px',
-      padding: '16px',
-      background: 'rgba(30, 41, 59, 0.3)',
-      border: '1px solid rgba(148, 163, 184, 0.1)',
-      borderRadius: '12px'
-    }}>
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '16px'
-      }}>
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          fontSize: '14px',
-          fontWeight: '600',
-          color: '#8b5cf6'
-        }}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-          </svg>
-          Historial de Precios (6 meses)
-        </div>
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '4px',
-          fontSize: '13px',
-          fontWeight: '600',
-          color: isDown ? '#10b981' : priceChange > 0 ? '#ef4444' : '#94a3b8'
-        }}>
-          {priceChange == 0 ? '=' : isDown ? '↓' : '↑'} {Math.abs(priceChange)}%
-        </div>
-      </div>
-
-      <div style={{ position: 'relative', height: '120px', marginBottom: '12px' }}>
-        <svg width="100%" height="120" style={{ display: 'block' }}>
-          <defs>
-            <linearGradient id={`priceGradient-${priceHistory[0]?.timestamp || 'default'}`} x1="0" x2="0" y1="0" y2="1">
-              <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.3"/>
-              <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0.05"/>
-            </linearGradient>
-          </defs>
-          
-          {/* Grid lines */}
-          <line x1="0" y1="30" x2="100%" y2="30" stroke="rgba(148, 163, 184, 0.1)" strokeWidth="1"/>
-          <line x1="0" y1="60" x2="100%" y2="60" stroke="rgba(148, 163, 184, 0.1)" strokeWidth="1"/>
-          <line x1="0" y1="90" x2="100%" y2="90" stroke="rgba(148, 163, 184, 0.1)" strokeWidth="1"/>
-          
-          {/* Area under line */}
-          <path
-            d={priceHistory.map((point, i) => {
-              const x = priceHistory.length > 1 ? (i / (priceHistory.length - 1)) * 100 : 50;
-              const y = 100 - ((point.price - effectiveMin) / effectiveRange) * 80;
-              return `${i === 0 ? 'M' : 'L'} ${x}% ${y}`;
-            }).join(' ') + ` L 100% 100 L 0 100 Z`}
-            fill={`url(#priceGradient-${priceHistory[0]?.timestamp || 'default'})`}
-          />
-          
-          {/* Line */}
-          <polyline
-            points={priceHistory.map((point, i) => {
-              const x = priceHistory.length > 1 ? (i / (priceHistory.length - 1)) * 100 : 50;
-              const y = 100 - ((point.price - effectiveMin) / effectiveRange) * 80;
-              return `${x}%,${y}`;
-            }).join(' ')}
-            fill="none"
-            stroke="#8b5cf6"
-            strokeWidth="2"
-          />
-          
-          {/* Points */}
-          {priceHistory.map((point, i) => {
-            const x = priceHistory.length > 1 ? (i / (priceHistory.length - 1)) * 100 : 50;
-            const y = 100 - ((point.price - effectiveMin) / effectiveRange) * 80;
-            return (
-              <circle
-                key={i}
-                cx={`${x}%`}
-                cy={y}
-                r="3"
-                fill="#8b5cf6"
-                stroke="rgba(15, 23, 42, 0.8)"
-                strokeWidth="2"
-              />
-            );
-          })}
-        </svg>
-      </div>
-
-      {/* Dates */}
-      {priceHistory.length > 1 && (
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          fontSize: '11px',
-          opacity: 0.6,
-          marginTop: '8px'
-        }}>
-          <span>{formatDate(priceHistory[0].date)}</span>
-          {priceHistory.length > 2 && (
-            <span>{formatDate(priceHistory[Math.floor(priceHistory.length / 2)].date)}</span>
-          )}
-          <span>{formatDate(priceHistory[priceHistory.length - 1].date)}</span>
-        </div>
-      )}
-
-      {/* Price range */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        marginTop: '12px',
-        padding: '8px 12px',
-        background: 'rgba(51, 65, 85, 0.3)',
-        borderRadius: '8px',
-        fontSize: '12px'
-      }}>
-        <div>
-          <div style={{ opacity: 0.6, marginBottom: '2px' }}>Precio más bajo</div>
-          <div style={{ fontWeight: '700', color: '#10b981' }}>{formatPrice(minPrice)}</div>
-        </div>
-        <div style={{ textAlign: 'right' }}>
-          <div style={{ opacity: 0.6, marginBottom: '2px' }}>Precio más alto</div>
-          <div style={{ fontWeight: '700', color: '#ef4444' }}>{formatPrice(maxPrice)}</div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// ============================================
-// COMPONENTE PRINCIPAL
-// ============================================
 const DealScraperAuth = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [username, setUsername] = useState('');
@@ -290,7 +11,7 @@ const DealScraperAuth = () => {
 
   // Credenciales - CAMBIA ESTAS POR LAS QUE QUIERAS
   const VALID_CREDENTIALS = {
-    'admin': 'password123',
+    'admin': 'password123',  // ← CORREGIDO: quité el espacio extra
     'usuario1': 'demo2024',
     'invitado': 'invitado123',
     'coco':'cocoynico',
@@ -363,12 +84,14 @@ const DealScraperAuth = () => {
 
   const loadData = async () => {
     try {
+      // CORREGIDO: Usar localStorage en lugar de window.storage
       const dealsData = localStorage.getItem('scraped-deals');
       if (dealsData) {
         const data = JSON.parse(dealsData);
         setDeals(data.deals);
         setLastUpdate(data.lastUpdate);
       } else {
+        // Load sample deals automatically on first load
         const sampleDeals = generateSampleDeals();
         const data = {
           deals: sampleDeals,
@@ -385,6 +108,7 @@ const DealScraperAuth = () => {
       }
     } catch (error) {
       console.error('Error loading data:', error);
+      // Fallback to sample deals if storage fails
       const sampleDeals = generateSampleDeals();
       setDeals(sampleDeals);
       setLastUpdate(new Date().toISOString());
@@ -394,6 +118,7 @@ const DealScraperAuth = () => {
   const scrapeDeals = async () => {
     setLoading(true);
     try {
+      // Call the serverless function for real web scraping
       const response = await fetch('/api/scrape', {
         method: 'POST',
         headers: {
@@ -408,18 +133,25 @@ const DealScraperAuth = () => {
       const result = await response.json();
       
       if (result.success && result.deals && result.deals.length > 0) {
+        // Real deals from scraping
         const deals = result.deals;
+        
+        // Sort by discount
         deals.sort((a, b) => b.discount - a.discount);
         
+        // Save to storage
         const data = {
           deals: deals,
           lastUpdate: new Date().toISOString()
         };
         
+        // CORREGIDO: Usar localStorage
         localStorage.setItem('scraped-deals', JSON.stringify(data));
+        
         setDeals(deals);
         setLastUpdate(data.lastUpdate);
       } else {
+        // Fallback to sample data if scraping fails
         console.log('Scraping returned no deals, using sample data');
         const sampleDeals = generateSampleDeals();
         const data = {
@@ -432,6 +164,7 @@ const DealScraperAuth = () => {
       }
     } catch (error) {
       console.error('Error fetching deals:', error);
+      // Fallback to sample data on error
       const sampleDeals = generateSampleDeals();
       const data = {
         deals: sampleDeals,
@@ -623,6 +356,7 @@ const DealScraperAuth = () => {
       : [...favorites, dealId];
     
     setFavorites(newFavorites);
+    // CORREGIDO: Usar localStorage
     localStorage.setItem('favorite-deals', JSON.stringify(newFavorites));
   };
 
@@ -821,7 +555,7 @@ const DealScraperAuth = () => {
     );
   }
 
-  // Main App
+  // Main App (same as before, but with logout button)
   return (
     <div style={{
       minHeight: '100vh',
@@ -1043,17 +777,7 @@ const DealScraperAuth = () => {
                     {deal.description}
                   </p>
 
-                  {/* COMPARACIÓN DE PRECIOS - NUEVO */}
-                  <PriceComparisonTable 
-                    priceComparison={deal.priceComparison}
-                    bestPrice={deal.bestPrice}
-                    maxSavings={deal.maxSavings}
-                  />
-
-                  {/* HISTORIAL DE PRECIOS - NUEVO */}
-                  <PriceHistoryChart priceHistory={deal.priceHistory} />
-
-                  <div style={{ marginBottom: '20px', marginTop: '20px' }}>
+                  <div style={{ marginBottom: '20px' }}>
                     <div style={{ fontSize: '16px', opacity: 0.6, textDecoration: 'line-through', marginBottom: '4px' }}>
                       {formatPrice(deal.originalPrice)}
                     </div>
