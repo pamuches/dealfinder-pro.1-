@@ -44,11 +44,11 @@ INSTRUCCIONES CRÍTICAS:
    - Amazon México (amazon.com.mx)
    - Liverpool (liverpool.com.mx)
    - Mercado Libre México
-   - Bodega Aurrera
+   - Promodescuentos (promodescuentos.com.mx)
 
 2. Para CADA producto que encuentres:
    - Busca el producto específico en el sitio
-   - Obtén la URL REAL y COMPLETA del producto (no inventes URLs)
+   - Obtén la URL REAL y COMPLETA del producto (no inventes URLs y asegurate que las URLs funcionen)
    - Verifica que tenga descuento real mayor al 15%
    - Copia la URL exacta de la página del producto
 
@@ -56,7 +56,7 @@ INSTRUCCIONES CRÍTICAS:
 4. Si no encuentras la URL real de un producto, NO lo incluyas
 5. Las URLs deben ser clickeables y llevar directo al producto
 
-Encuentra 8-10 ofertas reales.
+Encuentra 10-15 ofertas reales.
 
 Devuelve SOLO este JSON sin markdown:
 {
