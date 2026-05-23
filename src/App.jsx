@@ -2,6 +2,283 @@ import React, { useState, useEffect } from 'react';
 import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { TrendingDown, TrendingUp, ExternalLink, RefreshCw, Zap, Tag, Clock, Heart, Filter, Star, Percent, Lock, LogOut } from 'lucide-react';
 
+// ============================================
+// COMPONENTE: Comparación de Precios
+// ============================================
+const PriceComparisonTable = ({ priceComparison, bestPrice, maxSavings }) => {
+  if (!priceComparison || priceComparison.length <= 1) return null;
+
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat('es-MX', {
+      style: 'currency',
+      currency: 'MXN',
+      minimumFractionDigits: 0
+    }).format(price);
+  };
+
+  return (
+    <div style={{
+      marginTop: '16px',
+      padding: '16px',
+      background: '#F3F4F6',
+      border: '1px solid #E5E7EB',
+      borderRadius: '12px'
+    }}>
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+        marginBottom: '12px',
+        fontSize: '14px',
+        fontWeight: '600',
+        color: '#0D1B3E'
+      }}>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M9 11l3 3L22 4"/>
+          <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+        </svg>
+        Comparación de Precios
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        {priceComparison.map((comp, idx) => (
+          <div key={idx} style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: '10px 12px',
+            background: comp.price === bestPrice ? '#DCFCE7' : '#FFFFFF',
+            border: comp.price === bestPrice ? '1px solid #86EFAC' : '1px solid #E5E7EB',
+            borderRadius: '8px',
+            fontSize: '14px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ color: '#1A1A1A' }}>{comp.store}</span>
+              {comp.price === bestPrice && (
+                <span style={{
+                  background: '#0D1B3E',
+                  color: '#FFFFFF',
+                  padding: '2px 8px',
+                  borderRadius: '4px',
+                  fontSize: '11px',
+                  fontWeight: '700'
+                }}>
+                  MEJOR PRECIO
+                </span>
+              )}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <span style={{
+                fontWeight: '700',
+                color: comp.price === bestPrice ? '#0D1B3E' : '#1A1A1A'
+              }}>
+                {formatPrice(comp.price)}
+              </span>
+              {comp.url && (
+                <a 
+                  href={comp.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  style={{
+                    color: '#0D1B3E',
+                    textDecoration: 'none',
+                    fontSize: '12px'
+                  }}
+                >
+                  Ver →
+                </a>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {maxSavings > 0 && (
+        <div style={{
+          marginTop: '12px',
+          padding: '8px 12px',
+          background: '#EFF6FF',
+          border: '1px solid #BFDBFE',
+          borderRadius: '8px',
+          fontSize: '13px',
+          color: '#0D1B3E',
+          textAlign: 'center',
+          fontWeight: '600'
+        }}>
+          💰 Ahorras hasta {formatPrice(maxSavings)} comprando en la tienda correcta
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ============================================
+// COMPONENTE: Historial de Precios (CORREGIDO)
+// ============================================
+const PriceHistoryChart = ({ priceHistory }) => {
+  if (!priceHistory || priceHistory.length === 0) return null;
+
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat('es-MX', {
+      style: 'currency',
+      currency: 'MXN',
+      minimumFractionDigits: 0
+    }).format(price);
+  };
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('es-MX', { month: 'short', year: '2-digit' });
+  };
+
+  const maxPrice = Math.max(...priceHistory.map(h => h.price));
+  const minPrice = Math.min(...priceHistory.map(h => h.price));
+  const priceRange = maxPrice - minPrice;
+  
+  const effectiveRange = priceRange === 0 ? maxPrice * 0.1 : priceRange;
+  const effectiveMin = priceRange === 0 ? minPrice * 0.95 : minPrice;
+  
+  const currentPrice = priceHistory[priceHistory.length - 1].price;
+  const oldestPrice = priceHistory[0].price;
+  const priceChange = oldestPrice !== 0 ? ((currentPrice - oldestPrice) / oldestPrice * 100).toFixed(1) : 0;
+  const isDown = priceChange < 0;
+
+  return (
+    <div style={{
+      marginTop: '16px',
+      padding: '16px',
+      background: '#F3F4F6',
+      border: '1px solid #E5E7EB',
+      borderRadius: '12px'
+    }}>
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: '16px'
+      }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          fontSize: '14px',
+          fontWeight: '600',
+          color: '#0D1B3E'
+        }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+          </svg>
+          Historial de Precios (6 meses)
+        </div>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '4px',
+          fontSize: '13px',
+          fontWeight: '600',
+          color: isDown ? '#059669' : priceChange > 0 ? '#DC2626' : '#6B7280'
+        }}>
+          {priceChange == 0 ? '=' : isDown ? '↓' : '↑'} {Math.abs(priceChange)}%
+        </div>
+      </div>
+
+      <div style={{ position: 'relative', height: '120px', marginBottom: '12px' }}>
+        <svg width="100%" height="120" style={{ display: 'block' }}>
+          <defs>
+            <linearGradient id={`priceGradient-${priceHistory[0]?.timestamp || 'default'}`} x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%" stopColor="#0D1B3E" stopOpacity="0.2"/>
+              <stop offset="100%" stopColor="#0D1B3E" stopOpacity="0.05"/>
+            </linearGradient>
+          </defs>
+          
+          {/* Grid lines */}
+          <line x1="0" y1="30" x2="100%" y2="30" stroke="#E5E7EB" strokeWidth="1"/>
+          <line x1="0" y1="60" x2="100%" y2="60" stroke="#E5E7EB" strokeWidth="1"/>
+          <line x1="0" y1="90" x2="100%" y2="90" stroke="#E5E7EB" strokeWidth="1"/>
+          
+          {/* Area under line */}
+          <path
+            d={priceHistory.map((point, i) => {
+              const x = priceHistory.length > 1 ? (i / (priceHistory.length - 1)) * 100 : 50;
+              const y = 100 - ((point.price - effectiveMin) / effectiveRange) * 80;
+              return `${i === 0 ? 'M' : 'L'} ${x}% ${y}`;
+            }).join(' ') + ` L 100% 100 L 0 100 Z`}
+            fill={`url(#priceGradient-${priceHistory[0]?.timestamp || 'default'})`}
+          />
+          
+          {/* Line */}
+          <polyline
+            points={priceHistory.map((point, i) => {
+              const x = priceHistory.length > 1 ? (i / (priceHistory.length - 1)) * 100 : 50;
+              const y = 100 - ((point.price - effectiveMin) / effectiveRange) * 80;
+              return `${x}%,${y}`;
+            }).join(' ')}
+            fill="none"
+            stroke="#0D1B3E"
+            strokeWidth="2"
+          />
+          
+          {/* Points */}
+          {priceHistory.map((point, i) => {
+            const x = priceHistory.length > 1 ? (i / (priceHistory.length - 1)) * 100 : 50;
+            const y = 100 - ((point.price - effectiveMin) / effectiveRange) * 80;
+            return (
+              <circle
+                key={i}
+                cx={`${x}%`}
+                cy={y}
+                r="3"
+                fill="#0D1B3E"
+                stroke="#FFFFFF"
+                strokeWidth="2"
+              />
+            );
+          })}
+        </svg>
+      </div>
+
+      {priceHistory.length > 1 && (
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          fontSize: '11px',
+          color: '#9CA3AF',
+          marginTop: '8px'
+        }}>
+          <span>{formatDate(priceHistory[0].date)}</span>
+          {priceHistory.length > 2 && (
+            <span>{formatDate(priceHistory[Math.floor(priceHistory.length / 2)].date)}</span>
+          )}
+          <span>{formatDate(priceHistory[priceHistory.length - 1].date)}</span>
+        </div>
+      )}
+
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        marginTop: '12px',
+        padding: '8px 12px',
+        background: '#FFFFFF',
+        border: '1px solid #E5E7EB',
+        borderRadius: '8px',
+        fontSize: '12px'
+      }}>
+        <div>
+          <div style={{ color: '#9CA3AF', marginBottom: '2px' }}>Precio más bajo</div>
+          <div style={{ fontWeight: '700', color: '#059669' }}>{formatPrice(minPrice)}</div>
+        </div>
+        <div style={{ textAlign: 'right' }}>
+          <div style={{ color: '#9CA3AF', marginBottom: '2px' }}>Precio más alto</div>
+          <div style={{ fontWeight: '700', color: '#DC2626' }}>{formatPrice(maxPrice)}</div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ============================================
+// COMPONENTE PRINCIPAL
+// ============================================
 const DealScraperAuth = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [username, setUsername] = useState('');
@@ -9,10 +286,11 @@ const DealScraperAuth = () => {
   const [loginError, setLoginError] = useState('');
   const [currentUser, setCurrentUser] = useState('');
 
-  // Credenciales - CAMBIA ESTAS POR LAS QUE QUIERAS
   const VALID_CREDENTIALS = {
+    'admin': 'password123',
+    'usuario1': 'demo2024',
+    'invitado': 'invitado123',
     'coco':'cocoynico',
-    // Agrega más usuarios aquí: 'nombreusuario': 'contraseña'
   };
 
   const [deals, setDeals] = useState([]);
@@ -26,12 +304,10 @@ const DealScraperAuth = () => {
   const [favorites, setFavorites] = useState([]);
   const [autoRefresh, setAutoRefresh] = useState(true);
 
-  // Check authentication on mount
   useEffect(() => {
     const savedAuth = localStorage.getItem('dealfinder_auth');
     if (savedAuth) {
       const { user, timestamp } = JSON.parse(savedAuth);
-      // Session expires after 24 hours
       if (Date.now() - timestamp < 86400000) {
         setIsAuthenticated(true);
         setCurrentUser(user);
@@ -48,7 +324,7 @@ const DealScraperAuth = () => {
       if (autoRefresh) {
         const interval = setInterval(() => {
           scrapeDeals();
-        }, 86400000); // 24 hours
+        }, 86400000);
         
         return () => clearInterval(interval);
       }
@@ -81,14 +357,12 @@ const DealScraperAuth = () => {
 
   const loadData = async () => {
     try {
-      // CORREGIDO: Usar localStorage en lugar de window.storage
       const dealsData = localStorage.getItem('scraped-deals');
       if (dealsData) {
         const data = JSON.parse(dealsData);
         setDeals(data.deals);
         setLastUpdate(data.lastUpdate);
       } else {
-        // Load sample deals automatically on first load
         const sampleDeals = generateSampleDeals();
         const data = {
           deals: sampleDeals,
@@ -105,7 +379,6 @@ const DealScraperAuth = () => {
       }
     } catch (error) {
       console.error('Error loading data:', error);
-      // Fallback to sample deals if storage fails
       const sampleDeals = generateSampleDeals();
       setDeals(sampleDeals);
       setLastUpdate(new Date().toISOString());
@@ -115,7 +388,6 @@ const DealScraperAuth = () => {
   const scrapeDeals = async () => {
     setLoading(true);
     try {
-      // Call the serverless function for real web scraping
       const response = await fetch('/api/scrape', {
         method: 'POST',
         headers: {
@@ -130,25 +402,18 @@ const DealScraperAuth = () => {
       const result = await response.json();
       
       if (result.success && result.deals && result.deals.length > 0) {
-        // Real deals from scraping
         const deals = result.deals;
-        
-        // Sort by discount
         deals.sort((a, b) => b.discount - a.discount);
         
-        // Save to storage
         const data = {
           deals: deals,
           lastUpdate: new Date().toISOString()
         };
         
-        // CORREGIDO: Usar localStorage
         localStorage.setItem('scraped-deals', JSON.stringify(data));
-        
         setDeals(deals);
         setLastUpdate(data.lastUpdate);
       } else {
-        // Fallback to sample data if scraping fails
         console.log('Scraping returned no deals, using sample data');
         const sampleDeals = generateSampleDeals();
         const data = {
@@ -161,7 +426,6 @@ const DealScraperAuth = () => {
       }
     } catch (error) {
       console.error('Error fetching deals:', error);
-      // Fallback to sample data on error
       const sampleDeals = generateSampleDeals();
       const data = {
         deals: sampleDeals,
@@ -353,7 +617,6 @@ const DealScraperAuth = () => {
       : [...favorites, dealId];
     
     setFavorites(newFavorites);
-    // CORREGIDO: Usar localStorage
     localStorage.setItem('favorite-deals', JSON.stringify(newFavorites));
   };
 
@@ -372,9 +635,9 @@ const DealScraperAuth = () => {
     });
 
   const getTemperatureColor = (temp) => {
-    if (temp >= 90) return '#ef4444';
-    if (temp >= 75) return '#f59e0b';
-    return '#10b981';
+    if (temp >= 90) return '#DC2626';
+    if (temp >= 75) return '#F59E0B';
+    return '#059669';
   };
 
   const formatPrice = (price) => {
@@ -401,7 +664,7 @@ const DealScraperAuth = () => {
     return (
       <div style={{
         minHeight: '100vh',
-        background: 'linear-gradient(135deg, #0a0f1e 0%, #1a1f35 100%)',
+        background: '#FAFAFA',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -414,10 +677,10 @@ const DealScraperAuth = () => {
           input {
             width: 100%;
             padding: 14px 18px;
-            background: rgba(30, 41, 59, 0.8);
-            border: 1px solid rgba(148, 163, 184, 0.2);
+            background: #FFFFFF;
+            border: 1px solid #E5E7EB;
             border-radius: 10px;
-            color: #e2e8f0;
+            color: #1A1A1A;
             font-size: 15px;
             transition: all 0.3s ease;
             font-family: 'Inter', sans-serif;
@@ -425,13 +688,13 @@ const DealScraperAuth = () => {
           
           input:focus {
             outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            border-color: #0D1B3E;
+            box-shadow: 0 0 0 3px rgba(13, 27, 62, 0.1);
           }
           
           .login-btn {
             width: 100%;
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            background: #0D1B3E;
             color: white;
             border: none;
             padding: 14px;
@@ -443,23 +706,24 @@ const DealScraperAuth = () => {
           }
           
           .login-btn:hover {
+            background: #1E3A6E;
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
+            box-shadow: 0 10px 25px rgba(13, 27, 62, 0.3);
           }
         `}</style>
 
         <div style={{
-          background: 'rgba(30, 41, 59, 0.6)',
-          backdropFilter: 'blur(20px)',
-          border: '1px solid rgba(148, 163, 184, 0.1)',
+          background: '#FFFFFF',
+          border: '1px solid #E5E7EB',
           borderRadius: '20px',
           padding: '48px',
           maxWidth: '420px',
-          width: '100%'
+          width: '100%',
+          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.05)'
         }}>
           <div style={{ textAlign: 'center', marginBottom: '32px' }}>
             <div style={{
-              background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
+              background: '#0D1B3E',
               width: '64px',
               height: '64px',
               borderRadius: '16px',
@@ -474,20 +738,18 @@ const DealScraperAuth = () => {
               fontSize: '28px',
               fontWeight: '800',
               margin: '0 0 8px 0',
-              background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent'
+              color: '#1A1A1A'
             }}>
               DealFinder Pro
             </h1>
-            <p style={{ color: '#94a3b8', fontSize: '15px', margin: 0 }}>
+            <p style={{ color: '#6B7280', fontSize: '15px', margin: 0 }}>
               Acceso Restringido
             </p>
           </div>
 
           <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <div>
-              <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500', color: '#e2e8f0' }}>
+              <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500', color: '#1A1A1A' }}>
                 Usuario
               </label>
               <input
@@ -500,7 +762,7 @@ const DealScraperAuth = () => {
             </div>
 
             <div>
-              <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500', color: '#e2e8f0' }}>
+              <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500', color: '#1A1A1A' }}>
                 Contraseña
               </label>
               <input
@@ -514,11 +776,11 @@ const DealScraperAuth = () => {
 
             {loginError && (
               <div style={{
-                background: 'rgba(239, 68, 68, 0.1)',
-                border: '1px solid rgba(239, 68, 68, 0.3)',
+                background: '#FEE2E2',
+                border: '1px solid #FCA5A5',
                 borderRadius: '10px',
                 padding: '12px',
-                color: '#ef4444',
+                color: '#DC2626',
                 fontSize: '14px',
                 textAlign: 'center'
               }}>
@@ -534,13 +796,13 @@ const DealScraperAuth = () => {
           <div style={{
             marginTop: '24px',
             padding: '16px',
-            background: 'rgba(59, 130, 246, 0.1)',
-            border: '1px solid rgba(59, 130, 246, 0.2)',
+            background: '#F3F4F6',
+            border: '1px solid #E5E7EB',
             borderRadius: '10px',
             fontSize: '13px',
-            color: '#94a3b8'
+            color: '#6B7280'
           }}>
-            <div style={{ fontWeight: '600', marginBottom: '8px', color: '#3b82f6' }}>
+            <div style={{ fontWeight: '600', marginBottom: '8px', color: '#0D1B3E' }}>
               Usuarios de prueba:
             </div>
             <div>• admin / password123</div>
@@ -552,12 +814,12 @@ const DealScraperAuth = () => {
     );
   }
 
-  // Main App (same as before, but with logout button)
+  // Main App
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(to bottom right, #0a0f1e 0%, #1a1f35 50%, #0a0f1e 100%)',
-      color: '#e2e8f0',
+      background: '#FAFAFA',
+      color: '#1A1A1A',
       fontFamily: "'Inter', -apple-system, sans-serif"
     }}>
       <style>{`
@@ -568,9 +830,8 @@ const DealScraperAuth = () => {
         }
         
         .deal-card {
-          background: linear-gradient(135deg, rgba(30, 41, 59, 0.4) 0%, rgba(51, 65, 85, 0.3) 100%);
-          backdrop-filter: blur(20px);
-          border: 1px solid rgba(148, 163, 184, 0.1);
+          background: #FFFFFF;
+          border: 1px solid #E5E7EB;
           borderRadius: 16px;
           overflow: hidden;
           transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -580,13 +841,13 @@ const DealScraperAuth = () => {
         }
         
         .deal-card:hover {
-          transform: translateY(-8px) scale(1.02);
-          border-color: rgba(59, 130, 246, 0.3);
-          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+          transform: translateY(-8px);
+          border-color: #0D1B3E;
+          box-shadow: 0 20px 40px rgba(13, 27, 62, 0.15);
         }
         
         .btn-primary {
-          background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+          background: #0D1B3E;
           color: white;
           border: none;
           padding: 14px 28px;
@@ -601,19 +862,20 @@ const DealScraperAuth = () => {
         }
         
         .btn-primary:hover {
+          background: #1E3A6E;
           transform: translateY(-2px);
-          box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
+          box-shadow: 0 10px 25px rgba(13, 27, 62, 0.3);
         }
       `}</style>
 
       {/* Header */}
       <div style={{
-        background: 'rgba(15, 23, 42, 0.8)',
-        backdropFilter: 'blur(20px)',
-        borderBottom: '1px solid rgba(148, 163, 184, 0.1)',
+        background: '#FFFFFF',
+        borderBottom: '1px solid #E5E7EB',
         position: 'sticky',
         top: 0,
-        zIndex: 100
+        zIndex: 100,
+        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)'
       }}>
         <div style={{ maxWidth: '1600px', margin: '0 auto', padding: '24px 32px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '20px' }}>
@@ -622,15 +884,13 @@ const DealScraperAuth = () => {
                 fontSize: '36px',
                 fontWeight: '800',
                 margin: '0 0 6px 0',
-                background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
+                color: '#0D1B3E',
                 letterSpacing: '-0.5px'
               }}>
-                <Zap size={36} style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: '12px', color: '#3b82f6' }} />
+                <Zap size={36} style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: '12px', color: '#0D1B3E' }} />
                 DealFinder Pro
               </h1>
-              <p style={{ margin: 0, opacity: 0.7, fontSize: '15px' }}>
+              <p style={{ margin: 0, color: '#6B7280', fontSize: '15px' }}>
                 Usuario: {currentUser} • Actualización cada 24h
               </p>
             </div>
@@ -647,9 +907,9 @@ const DealScraperAuth = () => {
               <button 
                 onClick={handleLogout}
                 style={{
-                  background: 'rgba(239, 68, 68, 0.1)',
-                  border: '1px solid rgba(239, 68, 68, 0.3)',
-                  color: '#ef4444',
+                  background: '#FEE2E2',
+                  border: '1px solid #FCA5A5',
+                  color: '#DC2626',
                   padding: '14px 20px',
                   borderRadius: '10px',
                   fontWeight: '600',
@@ -676,37 +936,40 @@ const DealScraperAuth = () => {
           marginBottom: '40px'
         }}>
           <div style={{
-            background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(37, 99, 235, 0.05) 100%)',
-            border: '1px solid rgba(59, 130, 246, 0.2)',
+            background: '#FFFFFF',
+            border: '1px solid #E5E7EB',
             borderRadius: '16px',
-            padding: '24px'
+            padding: '24px',
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)'
           }}>
-            <div style={{ fontSize: '14px', opacity: 0.7, marginBottom: '8px', fontWeight: '500' }}>Ofertas Activas</div>
-            <div style={{ fontSize: '42px', fontWeight: '800', fontFamily: "'Space Mono', monospace", color: '#3b82f6' }}>
+            <div style={{ fontSize: '14px', color: '#6B7280', marginBottom: '8px', fontWeight: '500' }}>Ofertas Activas</div>
+            <div style={{ fontSize: '42px', fontWeight: '800', fontFamily: "'Space Mono', monospace", color: '#0D1B3E' }}>
               {deals.length}
             </div>
           </div>
 
           <div style={{
-            background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.05) 100%)',
-            border: '1px solid rgba(16, 185, 129, 0.2)',
+            background: '#FFFFFF',
+            border: '1px solid #E5E7EB',
             borderRadius: '16px',
-            padding: '24px'
+            padding: '24px',
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)'
           }}>
-            <div style={{ fontSize: '14px', opacity: 0.7, marginBottom: '8px', fontWeight: '500' }}>Descuento Promedio</div>
-            <div style={{ fontSize: '42px', fontWeight: '800', fontFamily: "'Space Mono', monospace", color: '#10b981' }}>
+            <div style={{ fontSize: '14px', color: '#6B7280', marginBottom: '8px', fontWeight: '500' }}>Descuento Promedio</div>
+            <div style={{ fontSize: '42px', fontWeight: '800', fontFamily: "'Space Mono', monospace", color: '#0D1B3E' }}>
               {deals.length > 0 ? Math.round(deals.reduce((sum, d) => sum + d.discount, 0) / deals.length) : 0}%
             </div>
           </div>
 
           <div style={{
-            background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.05) 100%)',
-            border: '1px solid rgba(239, 68, 68, 0.2)',
+            background: '#FFFFFF',
+            border: '1px solid #E5E7EB',
             borderRadius: '16px',
-            padding: '24px'
+            padding: '24px',
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)'
           }}>
-            <div style={{ fontSize: '14px', opacity: 0.7, marginBottom: '8px', fontWeight: '500' }}>Última Actualización</div>
-            <div style={{ fontSize: '24px', fontWeight: '700', color: '#ef4444' }}>
+            <div style={{ fontSize: '14px', color: '#6B7280', marginBottom: '8px', fontWeight: '500' }}>Última Actualización</div>
+            <div style={{ fontSize: '24px', fontWeight: '700', color: '#0D1B3E' }}>
               {getTimeSinceUpdate()}
             </div>
           </div>
@@ -715,8 +978,8 @@ const DealScraperAuth = () => {
         {/* Deals Grid */}
         {loading && deals.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '80px 20px' }}>
-            <RefreshCw size={48} style={{ animation: 'spin 1s linear infinite', color: '#3b82f6', marginBottom: '16px' }} />
-            <div style={{ fontSize: '18px', fontWeight: '600' }}>Cargando ofertas...</div>
+            <RefreshCw size={48} style={{ animation: 'spin 1s linear infinite', color: '#0D1B3E', marginBottom: '16px' }} />
+            <div style={{ fontSize: '18px', fontWeight: '600', color: '#1A1A1A' }}>Cargando ofertas...</div>
           </div>
         ) : (
           <div style={{
@@ -734,12 +997,11 @@ const DealScraperAuth = () => {
                   borderRadius: '8px',
                   fontWeight: '700',
                   fontSize: '14px',
-                  backdropFilter: 'blur(10px)',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '6px',
-                  background: `linear-gradient(135deg, ${getTemperatureColor(deal.temperature)}33 0%, ${getTemperatureColor(deal.temperature)}22 100%)`,
-                  border: `1px solid ${getTemperatureColor(deal.temperature)}66`,
+                  background: '#FFFFFF',
+                  border: `2px solid ${getTemperatureColor(deal.temperature)}`,
                   color: getTemperatureColor(deal.temperature)
                 }}>
                   <Zap size={16} fill="currentColor" />
@@ -749,41 +1011,50 @@ const DealScraperAuth = () => {
                 <div style={{ marginTop: '40px' }}>
                   <div style={{
                     display: 'inline-block',
-                    background: 'rgba(59, 130, 246, 0.1)',
-                    border: '1px solid rgba(59, 130, 246, 0.3)',
+                    background: '#EFF6FF',
+                    border: '1px solid #BFDBFE',
                     padding: '4px 10px',
                     borderRadius: '6px',
                     fontSize: '12px',
                     fontWeight: '600',
-                    color: '#3b82f6',
+                    color: '#0D1B3E',
                     marginBottom: '12px'
                   }}>
                     {deal.category}
                   </div>
 
-                  <h3 style={{ fontSize: '18px', fontWeight: '700', margin: '0 0 8px 0', lineHeight: '1.4' }}>
+                  <h3 style={{ fontSize: '18px', fontWeight: '700', margin: '0 0 8px 0', lineHeight: '1.4', color: '#1A1A1A' }}>
                     {deal.title}
                   </h3>
 
-                  <div style={{ fontSize: '14px', opacity: 0.7, marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <div style={{ fontSize: '14px', color: '#6B7280', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <Tag size={14} />
                     {deal.store}
                   </div>
 
-                  <p style={{ fontSize: '14px', opacity: 0.8, lineHeight: '1.6', margin: '0 0 20px 0' }}>
+                  <p style={{ fontSize: '14px', color: '#6B7280', lineHeight: '1.6', margin: '0 0 20px 0' }}>
                     {deal.description}
                   </p>
 
-                  <div style={{ marginBottom: '20px' }}>
-                    <div style={{ fontSize: '16px', opacity: 0.6, textDecoration: 'line-through', marginBottom: '4px' }}>
+                  <PriceComparisonTable 
+                    priceComparison={deal.priceComparison}
+                    bestPrice={deal.bestPrice}
+                    maxSavings={deal.maxSavings}
+                  />
+
+                  <PriceHistoryChart priceHistory={deal.priceHistory} />
+
+                  <div style={{ marginBottom: '20px', marginTop: '20px' }}>
+                    <div style={{ fontSize: '16px', color: '#9CA3AF', textDecoration: 'line-through', marginBottom: '4px' }}>
                       {formatPrice(deal.originalPrice)}
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
-                      <div style={{ fontSize: '36px', fontWeight: '800', fontFamily: "'Space Mono', monospace", color: '#10b981' }}>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px', flexWrap: 'wrap' }}>
+                      <div style={{ fontSize: '36px', fontWeight: '800', fontFamily: "'Space Mono', monospace", color: '#0D1B3E' }}>
                         {formatPrice(deal.discountPrice)}
                       </div>
                       <div style={{
-                        background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                        background: '#0D1B3E',
+                        color: '#FFFFFF',
                         padding: '6px 12px',
                         borderRadius: '8px',
                         fontSize: '16px',
@@ -796,7 +1067,7 @@ const DealScraperAuth = () => {
                         {deal.discount}% OFF
                       </div>
                     </div>
-                    <div style={{ fontSize: '14px', color: '#10b981', fontWeight: '600', marginTop: '8px' }}>
+                    <div style={{ fontSize: '14px', color: '#059669', fontWeight: '600', marginTop: '8px' }}>
                       Ahorras {formatPrice(deal.originalPrice - deal.discountPrice)}
                     </div>
                   </div>
