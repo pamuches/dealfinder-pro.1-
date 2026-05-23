@@ -113,7 +113,7 @@ const PriceComparisonTable = ({ priceComparison, bestPrice, maxSavings }) => {
 };
 
 // ============================================
-// COMPONENTE: Historial de Precios (CORREGIDO)
+// COMPONENTE: Historial de Precios (CORREGIDO - SIN ERRORES SVG)
 // ============================================
 const PriceHistoryChart = ({ priceHistory }) => {
   if (!priceHistory || priceHistory.length === 0) return null;
@@ -183,7 +183,7 @@ const PriceHistoryChart = ({ priceHistory }) => {
       </div>
 
       <div style={{ position: 'relative', height: '120px', marginBottom: '12px' }}>
-        <svg width="100%" height="120" style={{ display: 'block' }}>
+        <svg width="100%" height="120" viewBox="0 0 100 120" preserveAspectRatio="none" style={{ display: 'block' }}>
           <defs>
             <linearGradient id={`priceGradient-${priceHistory[0]?.timestamp || 'default'}`} x1="0" x2="0" y1="0" y2="1">
               <stop offset="0%" stopColor="#0D1B3E" stopOpacity="0.2"/>
@@ -192,17 +192,17 @@ const PriceHistoryChart = ({ priceHistory }) => {
           </defs>
           
           {/* Grid lines */}
-          <line x1="0" y1="30" x2="100%" y2="30" stroke="#E5E7EB" strokeWidth="1"/>
-          <line x1="0" y1="60" x2="100%" y2="60" stroke="#E5E7EB" strokeWidth="1"/>
-          <line x1="0" y1="90" x2="100%" y2="90" stroke="#E5E7EB" strokeWidth="1"/>
+          <line x1="0" y1="30" x2="100" y2="30" stroke="#E5E7EB" strokeWidth="0.5" vectorEffect="non-scaling-stroke"/>
+          <line x1="0" y1="60" x2="100" y2="60" stroke="#E5E7EB" strokeWidth="0.5" vectorEffect="non-scaling-stroke"/>
+          <line x1="0" y1="90" x2="100" y2="90" stroke="#E5E7EB" strokeWidth="0.5" vectorEffect="non-scaling-stroke"/>
           
           {/* Area under line */}
           <path
             d={priceHistory.map((point, i) => {
               const x = priceHistory.length > 1 ? (i / (priceHistory.length - 1)) * 100 : 50;
               const y = 100 - ((point.price - effectiveMin) / effectiveRange) * 80;
-              return `${i === 0 ? 'M' : 'L'} ${x}% ${y}`;
-            }).join(' ') + ` L 100% 100 L 0 100 Z`}
+              return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
+            }).join(' ') + ` L 100 100 L 0 100 Z`}
             fill={`url(#priceGradient-${priceHistory[0]?.timestamp || 'default'})`}
           />
           
@@ -211,11 +211,12 @@ const PriceHistoryChart = ({ priceHistory }) => {
             points={priceHistory.map((point, i) => {
               const x = priceHistory.length > 1 ? (i / (priceHistory.length - 1)) * 100 : 50;
               const y = 100 - ((point.price - effectiveMin) / effectiveRange) * 80;
-              return `${x}%,${y}`;
+              return `${x},${y}`;
             }).join(' ')}
             fill="none"
             stroke="#0D1B3E"
-            strokeWidth="2"
+            strokeWidth="0.8"
+            vectorEffect="non-scaling-stroke"
           />
           
           {/* Points */}
@@ -225,12 +226,13 @@ const PriceHistoryChart = ({ priceHistory }) => {
             return (
               <circle
                 key={i}
-                cx={`${x}%`}
+                cx={x}
                 cy={y}
-                r="3"
+                r="1.2"
                 fill="#0D1B3E"
                 stroke="#FFFFFF"
-                strokeWidth="2"
+                strokeWidth="0.8"
+                vectorEffect="non-scaling-stroke"
               />
             );
           })}
@@ -439,6 +441,30 @@ const DealScraperAuth = () => {
   };
 
   const generateSampleDeals = () => {
+    // Función para generar historial de precios realista
+    const generatePriceHistory = (currentPrice) => {
+      const history = [];
+      const today = new Date();
+      
+      // Generar 6 meses de historial
+      for (let i = 5; i >= 0; i--) {
+        const date = new Date(today);
+        date.setMonth(date.getMonth() - i);
+        
+        // Variación realista: precio más alto en el pasado, bajando hacia el actual
+        const variationFactor = 1 + (i * 0.03) + (Math.random() * 0.05 - 0.025);
+        const historicalPrice = Math.round(currentPrice * variationFactor);
+        
+        history.push({
+          date: date.toISOString().split('T')[0],
+          price: historicalPrice,
+          timestamp: date.getTime()
+        });
+      }
+      
+      return history;
+    };
+
     return [
       {
         id: 'deal_1',
@@ -452,7 +478,7 @@ const DealScraperAuth = () => {
         description: 'Chip A17 Pro, cámara de 48MP, Dynamic Island',
         temperature: 92,
         scrapedAt: new Date().toISOString(),
-        priceHistory: [{ date: new Date().toISOString().split('T')[0], price: 24999, timestamp: Date.now() }]
+        priceHistory: generatePriceHistory(24999)
       },
       {
         id: 'deal_2',
@@ -466,7 +492,7 @@ const DealScraperAuth = () => {
         description: 'Cancelación de ruido líder, 30hrs batería',
         temperature: 88,
         scrapedAt: new Date().toISOString(),
-        priceHistory: [{ date: new Date().toISOString().split('T')[0], price: 5999, timestamp: Date.now() }]
+        priceHistory: generatePriceHistory(5999)
       },
       {
         id: 'deal_3',
@@ -480,7 +506,7 @@ const DealScraperAuth = () => {
         description: 'Galaxy AI, S Pen incluido, cámara de 200MP',
         temperature: 85,
         scrapedAt: new Date().toISOString(),
-        priceHistory: [{ date: new Date().toISOString().split('T')[0], price: 27499, timestamp: Date.now() }]
+        priceHistory: generatePriceHistory(27499)
       },
       {
         id: 'deal_4',
@@ -494,7 +520,7 @@ const DealScraperAuth = () => {
         description: 'Chip M2, 8GB RAM, pantalla Liquid Retina',
         temperature: 90,
         scrapedAt: new Date().toISOString(),
-        priceHistory: [{ date: new Date().toISOString().split('T')[0], price: 21999, timestamp: Date.now() }]
+        priceHistory: generatePriceHistory(21999)
       },
       {
         id: 'deal_5',
@@ -508,7 +534,7 @@ const DealScraperAuth = () => {
         description: 'Chip M4, pantalla OLED Ultra Retina XDR',
         temperature: 87,
         scrapedAt: new Date().toISOString(),
-        priceHistory: [{ date: new Date().toISOString().split('T')[0], price: 18999, timestamp: Date.now() }]
+        priceHistory: generatePriceHistory(18999)
       },
       {
         id: 'deal_6',
@@ -522,7 +548,7 @@ const DealScraperAuth = () => {
         description: 'Cancelación activa de ruido, audio espacial',
         temperature: 94,
         scrapedAt: new Date().toISOString(),
-        priceHistory: [{ date: new Date().toISOString().split('T')[0], price: 4799, timestamp: Date.now() }]
+        priceHistory: generatePriceHistory(4799)
       },
       {
         id: 'deal_7',
@@ -536,7 +562,7 @@ const DealScraperAuth = () => {
         description: 'Consola digital, diseño compacto, 1TB SSD',
         temperature: 91,
         scrapedAt: new Date().toISOString(),
-        priceHistory: [{ date: new Date().toISOString().split('T')[0], price: 9999, timestamp: Date.now() }]
+        priceHistory: generatePriceHistory(9999)
       },
       {
         id: 'deal_8',
@@ -550,7 +576,7 @@ const DealScraperAuth = () => {
         description: 'Chip S9, pantalla siempre activa, sensor temperatura',
         temperature: 89,
         scrapedAt: new Date().toISOString(),
-        priceHistory: [{ date: new Date().toISOString().split('T')[0], price: 8499, timestamp: Date.now() }]
+        priceHistory: generatePriceHistory(8499)
       },
       {
         id: 'deal_9',
@@ -564,7 +590,7 @@ const DealScraperAuth = () => {
         description: 'Pantalla OLED 7 pulgadas, 64GB almacenamiento',
         temperature: 86,
         scrapedAt: new Date().toISOString(),
-        priceHistory: [{ date: new Date().toISOString().split('T')[0], price: 7499, timestamp: Date.now() }]
+        priceHistory: generatePriceHistory(7499)
       },
       {
         id: 'deal_10',
@@ -578,7 +604,7 @@ const DealScraperAuth = () => {
         description: 'Quantum Dot, HDR10+, Tizen OS',
         temperature: 88,
         scrapedAt: new Date().toISOString(),
-        priceHistory: [{ date: new Date().toISOString().split('T')[0], price: 13999, timestamp: Date.now() }]
+        priceHistory: generatePriceHistory(13999)
       },
       {
         id: 'deal_11',
@@ -592,7 +618,7 @@ const DealScraperAuth = () => {
         description: 'Detección láser, 60 min autonomía, filtro HEPA',
         temperature: 90,
         scrapedAt: new Date().toISOString(),
-        priceHistory: [{ date: new Date().toISOString().split('T')[0], price: 12999, timestamp: Date.now() }]
+        priceHistory: generatePriceHistory(12999)
       },
       {
         id: 'deal_12',
@@ -606,7 +632,7 @@ const DealScraperAuth = () => {
         description: '5.3K60 video, HDR, HyperSmooth 6.0',
         temperature: 87,
         scrapedAt: new Date().toISOString(),
-        priceHistory: [{ date: new Date().toISOString().split('T')[0], price: 9499, timestamp: Date.now() }]
+        priceHistory: generatePriceHistory(9499)
       }
     ];
   };
@@ -1089,3 +1115,4 @@ const DealScraperAuth = () => {
 };
 
 export default DealScraperAuth;
+
