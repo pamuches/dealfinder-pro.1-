@@ -132,7 +132,7 @@ Devuelve SOLO este JSON sin markdown:
       const today = new Date();
       
       // Generar 12 meses de historial
-      for (let i = 5; i >= 0; i--) {
+      for (let i = 11; i >= 0; i--) {
         const date = new Date(today);
         date.setMonth(date.getMonth() - i);
         
