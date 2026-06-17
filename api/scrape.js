@@ -34,13 +34,13 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         model: "claude-sonnet-4-6",
-        max_tokens: 4500,
+        max_tokens: 4000,
         messages: [{
           role: "user",
           content: `Eres un experto comparador de precios en México. Encuentra productos populares con descuento >15% y compara precios entre tiendas.
 
 ESTRATEGIA:
-1. Busca 5-10 productos populares (electrónica, hogar, tecnología)
+1. Busca 10-15 productos populares (electrónica, hogar, tecnología)
 2. Para CADA producto, intenta encontrarlo en 2-3 tiendas diferentes
 3. Compara precios del MISMO producto entre tiendas
 
