@@ -40,7 +40,7 @@ export default async function handler(req, res) {
           content: `Eres un experto comparador de precios en México. Encuentra productos populares con descuento >15% y compara precios entre tiendas.
 
 ESTRATEGIA:
-1. Busca 10-15 productos populares (electrónica, hogar, tecnología)
+1. Busca 5-10 productos populares (electrónica, hogar, tecnología)
 2. Para CADA producto, intenta encontrarlo en 2-3 tiendas diferentes
 3. Compara precios del MISMO producto entre tiendas
 
@@ -52,7 +52,7 @@ TIENDAS A COMPARAR:
 
 REGLAS CRÍTICAS:
 1. USA web_search para buscar en cada tienda
-2. Obtén URLs REALES y COMPLETAS del producto (NO inventes URLs nunca y asegurate que las URLs funcionen y llevar directo al producto)
+2. Obtén URLs REALES y COMPLETAS del producto (NO inventes URLs nunca y asegurate que las URLs funcionen y llevar directo al producto).
 3. Si no encuentras URL real, NO incluyas ese resultado
 4. Verifica que las URLs funcionen y lleven directo al producto
 5. Copia la URL exacta de la página del producto
@@ -126,12 +126,12 @@ Devuelve SOLO este JSON sin markdown:
 
     const parsed = JSON.parse(jsonMatch[0]);
     
-    // Función para generar historial de precios de 12 meses
+    // Función para generar historial de precios de 6 meses
     const generatePriceHistory = (currentPrice) => {
       const history = [];
       const today = new Date();
       
-      // Generar 12 meses de historial
+      // Generar 6 meses de historial
       for (let i =5; i >= 0; i--) {
         const date = new Date(today);
         date.setMonth(date.getMonth() - i);
