@@ -34,7 +34,7 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         model: "claude-sonnet-4-6",
-        max_tokens: 4000,
+        max_tokens: 3000,
         messages: [{
           role: "user",
           content: `Eres un experto comparador de precios en México. Encuentra productos populares con descuento >15% y compara precios entre tiendas.
